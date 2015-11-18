@@ -1,0 +1,519 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="LXFML">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        LEGO Exchange Format used to descibe a scene of LEGO models.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Meta" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">
+              Every element in the Meta section should only have attributes and text. They should not have other elements in them.
+            </xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:any processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Cameras">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">
+              List of cameras that used in the scene and building instruction.
+            </xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Camera" type="camera" maxOccurs="unbounded" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Behaviors" type="behaviors" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">
+              List of behaviors used in the scene.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Bricks">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">
+              List of bricks used in the scene.
+            </xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:choice maxOccurs="unbounded">
+              <xs:element  name="Brick" type="brick" />
+            </xs:choice>
+            <xs:attribute name="cameraRef" type="xs:unsignedByte" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="RigidSystems">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">
+              List of rigidly and "joint" conected groups in the scene.
+            </xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="RigidSystem" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Rigid" type="rigid" maxOccurs="unbounded"/>
+                    <xs:element name="Joint" type="joint" minOccurs="0" maxOccurs="unbounded" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="GroupSystems">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">
+              List of groups in the scene.
+            </xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="GroupSystem" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Group" type="group" minOccurs="0" maxOccurs="unbounded" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="BuildingInstructions">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">
+              List of steps used in the building instruction.
+            </xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="BuildingInstruction" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:choice maxOccurs="unbounded">
+                    <xs:element name="Camera" type="cameraRef"/>
+                    <xs:element name="Step" type="step"/>
+                  </xs:choice>
+                  <xs:attribute name="name" type="xs:string" use="required" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="versionMajor" type="xs:unsignedByte" use="required" />
+      <xs:attribute name="versionMinor" type="xs:unsignedByte" use="required" />
+      <xs:attribute name="name" type="xs:string" use="required" />
+    </xs:complexType>
+
+    <xs:unique name="uniqueCameras">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">
+          Every Camera in the LXFML element must have a unique refID.
+        </xs:documentation>
+      </xs:annotation>
+      <xs:selector xpath="Cameras/Camera"/>
+      <xs:field xpath="@refID"/>
+    </xs:unique>
+
+    <xs:unique name="uniqueBricks">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">
+          Every Brick in the LXFML element must have a unique refID.
+        </xs:documentation>
+      </xs:annotation>
+      <xs:selector xpath="Bricks/Brick"/>
+      <xs:field xpath="@refID"/>
+    </xs:unique>
+
+    <xs:unique name="uniqueParts">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">
+          Every Part in the LXFML element must have a unique refID.
+        </xs:documentation>
+      </xs:annotation>
+      <xs:selector xpath="Bricks/Brick/Part"/>
+      <xs:field xpath="@refID"/>
+    </xs:unique>
+
+    <xs:unique name="uniqueBones">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">
+          Every Bone in the LXFML element must have a unique refID.
+        </xs:documentation>
+      </xs:annotation>
+      <xs:selector xpath="Bricks/Brick/Part/Bone"/>
+      <xs:field xpath="@refID"/>
+    </xs:unique>
+
+    <xs:unique name="uniqueRigids">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">
+          Every Rigid in the LXFML element must have a unique refID.
+        </xs:documentation>
+      </xs:annotation>
+      <xs:selector xpath="RigidSystems/RigidSystem/Rigid"/>
+      <xs:field xpath="@refID"/>
+    </xs:unique>
+
+    <xs:key name="pCameraKey">
+      <xs:selector xpath="Cameras/Camera"/>
+      <xs:field xpath="@refID"/>
+    </xs:key>
+
+    <xs:keyref name="CameraKeyRef" refer="pCameraKey">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">
+          The camera referenced in a Step must exist the cameras list.
+        </xs:documentation>
+      </xs:annotation>
+      <xs:selector xpath=".//Camera"/>
+      <xs:field xpath="@cameraRef"/>
+    </xs:keyref>
+
+    <xs:key name="pPartKey">
+      <xs:selector xpath="Bricks/Brick/Part"/>
+      <xs:field xpath="@refID"/>
+    </xs:key>
+
+    <xs:keyref name="PartKeyRef" refer="pPartKey">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">
+          The Parts referenced must exist in the Bricks list.
+        </xs:documentation>
+      </xs:annotation>
+      <xs:selector xpath=".//PartRef"/>
+      <xs:field xpath="@partRef"/>
+    </xs:keyref>
+
+    <xs:key name="pRigidKey">
+      <xs:selector xpath="Bricks/Brick/Part/Bone"/>
+      <xs:field xpath="@refID"/>
+    </xs:key>
+
+    <xs:keyref name="RigidKeyRef" refer="pRigidKey">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">
+          The Rigids referenced must exist in the Rigidsystems list.
+        </xs:documentation>
+      </xs:annotation>
+      <xs:selector xpath=".//RigidRef"/>
+      <xs:field xpath="@rigidRef"/>
+    </xs:keyref>
+
+  </xs:element>
+
+  <xs:complexType name="Application">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use in Meta section.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="name" type="xs:string" use="required" />
+    <xs:attribute name="versionMajor" type="xs:integer" use="required" />
+    <xs:attribute name="versionMinor" type="xs:integer" use="required" />
+  </xs:complexType>
+
+  <xs:element name="Author">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use in Meta section.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:attribute name="name" type="xs:string"/>
+      <xs:attribute name="age" type="xs:nonNegativeInteger" use="optional" default="0"/>
+      <xs:attribute name="country" type="xs:string" use="optional" default=""/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Description">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use in Meta section.
+        Is a textual description of the scene.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="lang" type="xs:language" use="optional" default="en"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="Brand">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use in Meta section.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="name" type="xs:string" use="required" />
+  </xs:complexType>
+
+  <xs:element name="BrickSet">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use in Meta section.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:attribute name="version" type="xs:integer"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:attributeGroup name="VersionType">
+    <xs:attribute name="versionMajor" type="xs:nonNegativeInteger"/>
+    <xs:attribute name="versionMinor" type="xs:nonNegativeInteger"/>
+  </xs:attributeGroup>
+
+  <xs:element name="Category">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use in Meta section.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:attribute name="category" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="camera">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use to define Cameras in the Cameras section.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="refID" type="xs:integer" use="required" />
+    <xs:attribute name="fieldOfView" type="xs:float" use="required" />
+    <xs:attribute name="distance" type="xs:float" use="required" />
+    <xs:attribute name="transformation" type="_transformation" use="required" />
+  </xs:complexType>
+
+  <xs:complexType name="brick">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use to define Bricks in the Bricks section.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Part" type="part" maxOccurs="unbounded"/>
+      <xs:element name="Behaviors" type="behaviors" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute name="refID" type="xs:integer" use="required" />
+    <xs:attribute name="designID" type="xs:integer" use="required" />
+    <xs:attribute name="itemNos" type="itemNos" use="optional" />
+  </xs:complexType>
+
+  <xs:simpleType name="itemNos">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use to define itemNos in the Bricks section.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9]*(#[0-9]+)*"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="part">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use to define Parts in the Bricks section.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:choice maxOccurs="unbounded">
+      <xs:element name="Bone" type="bone" />
+      <xs:element name="Behaviors" type="behaviors" maxOccurs="1"/>
+    </xs:choice>
+    <xs:attribute name="refID" type="xs:integer" use="required" />
+    <xs:attribute name="designID" type="xs:integer" use="required" />
+    <xs:attribute name="materials" type="intArray" use="required" />
+    <xs:attribute name="decoration" type="intArray" use="optional" />
+  </xs:complexType>
+
+  <xs:complexType name="bone">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use to define Bones in the Bricks section.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Behaviors" type="behaviors" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute name="refID" type="xs:integer" use="required"/>
+    <xs:attribute name="transformation" type="_transformation" use="required" />
+  </xs:complexType>
+
+  <xs:complexType name="rigid">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use to define rigids in the RigidsystemsSystems section.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="refID" type="xs:integer" use="required"/>
+    <xs:attribute name="transformation" type="_transformation" use="required"/>
+    <xs:attribute name="boneRefs" type="intArray" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="rigidRef">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use to refference rigids in the RigidsystemsSystems section.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="rigidRef" type="xs:integer" use="required"/>
+    <xs:attribute name="a" type="vector3" use ="required"/>
+    <xs:attribute name="z" type="vector3" use ="required"/>
+    <xs:attribute name="t" type="vector3" use ="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="joint">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use to define joints in the RigidsystemsSystems section.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="RigidRef" type="rigidRef" minOccurs="2" maxOccurs="2"/>
+    </xs:sequence>
+    <xs:attribute name="type" type="jointType" use="required"/>
+  </xs:complexType>
+
+  <xs:simpleType name="jointType">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use to define jointtype in the RigidsystemsSystems section.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="hinge"/>
+      <xs:enumeration value="ball"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="group">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use in the GroupeSystems section.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="Group" type="group" />
+      <xs:element name="Behaviors" type="behaviors"  maxOccurs="1"/>
+    </xs:choice>
+    <xs:attribute name="Name" type="xs:string" use="optional"/>
+    <xs:attribute name="transformation" type="_transformation" use="required"/>
+    <xs:attribute name="pivot" type="vector3" use="required"/>
+    <xs:attribute name="partRefs" type="intArray" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="step">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use in the BuildigGuide section.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:choice maxOccurs="unbounded">
+      <xs:element name="Step" type="step" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="PartRef" type="partRef" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="Camera" type="cameraRef" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:choice>
+    <xs:attribute name="name" type="xs:string" use="required" />
+  </xs:complexType>
+
+  <xs:complexType name="partRef">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use to refference parts in the BuildigGuide section.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="partRef" type="xs:integer" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="cameraRef">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use to refference Cameras in the Bricks and BuildigGuide sections.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="cameraRef" type="xs:integer" use="required"/>
+  </xs:complexType>
+
+  <xs:simpleType name="intArray">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use to type a komma separated array of integers.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9]*(,[0-9]+)*"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="vector3">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use to type a vector of 3 floats.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="-?[0-9]*(\.[0-9]+(E-?[0-9]{3})?)?(,-?[0-9]*(\.[0-9]+(E-?[0-9]{3})?)?){2}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="_transformation">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use to type a transformation matrice of 12 floats.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="-?[0-9]*(\.[0-9]+(E-?[0-9]{3})?)?(,-?[0-9]*(\.[0-9]+(E-?[0-9]{3})?)?){11}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="attributeType">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+       Describe an attribute.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="Key" type="xs:string" use="required"/>
+    <xs:attribute name="Value" type="xs:string" use="required" />
+  </xs:complexType>
+
+  <xs:complexType name="behavior">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+        For use to define behaviors.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:choice maxOccurs="unbounded">
+      <xs:element name="Attribute" type="attributeType"/>
+    </xs:choice>
+    <xs:attribute name="BehaviorName" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="behaviors">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">
+		List of behaviors.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:choice maxOccurs="unbounded">
+      <xs:element name="Behavior" type="behavior" />
+    </xs:choice>
+  </xs:complexType>
+
+</xs:schema>
